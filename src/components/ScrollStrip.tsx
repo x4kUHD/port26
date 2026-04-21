@@ -265,7 +265,7 @@ export default function ScrollStrip() {
           // individual boxes
           <motion.div
             key={project.title}
-            className={`relative flex-shrink-0 flex items-center justify-center overflow-hidden ${
+            className={`relative flex-shrink-0 flex items-center justify-center ${
               (isMobile && Math.abs(i - activeIndex) === 1) || (i === activeIndex && project.onClick) 
                 ? 'pointer-events-auto cursor-pointer' 
                 : 'pointer-events-none'
@@ -297,9 +297,9 @@ export default function ScrollStrip() {
             )}
 
             {/* title */}
-            {i === activeIndex && (
+            {!isMobile && i === activeIndex && (
               <motion.div
-                className="absolute -top-6 text-sm text-gray-500 whitespace-nowrap w-full text-center px-4 truncate"
+                className="absolute -top-6 left-0 text-sm text-gray-500 whitespace-nowrap"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={SPRING}
