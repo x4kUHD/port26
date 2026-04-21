@@ -76,7 +76,7 @@ const PROJECTS: Project[] = [
       { label: "GitHub", url: "https://github.com/x4kUHD", position: "top-left" },
       { label: "© 2026", url: "#", position: "top-right" },
       { label: "LinkedIn", url: "https://www.linkedin.com/in/yeonwook-kim/", position: "center" },
-      { label: "Twitter", url: "https://twitter.com", position: "bottom-left" },
+      { label: "Twitter", url: "https://x.com/eirocw", position: "bottom-left" },
       { label: "Spotify", url: "https://open.spotify.com/user/ukjq1ke3k359dnpumtd5o8xbd?si=c7c92ac838eb44c1", position: "bottom-right" },
     ]
   },
