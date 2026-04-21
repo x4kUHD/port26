@@ -98,8 +98,25 @@ function getHeight(i: number, active: number, vh: number) {
   return i === active ? activeH : REST_HEIGHT_RATIO * vh;
 }
 
-function getGap(vw: number) {
-  return GAP_RATIO * vw;
+function getGap(vw: number, isMobile: boolean = false) {
+  return isMobile ? 32 : GAP_RATIO * vw;
+}
+
+function getMobileWidth(vp: { w: number, h: number }) {
+  return Math.min(0.7 * vp.w, 0.7 * vp.h);
+}
+
+function getMobileHeight(i: number, active: number, vp: { w: number, h: number }, gap: number) {
+  const activeSize = getMobileWidth(vp);
+  if (i === active) return activeSize;
+  return Math.max(20, (vp.h - activeSize) / 2 - gap);
+}
+
+function getCenterOffsetY(active: number, vp: { w: number, h: number }, gap: number) {
+  let off = 0;
+  for (let i = 0; i < active; i++) off += getMobileHeight(i, active, vp, gap) + gap;
+  off += getMobileHeight(active, active, vp, gap) / 2;
+  return vp.h / 2 - off;
 }
 
 // hex → [r, g, b]s
@@ -130,8 +147,8 @@ function getColor(i: number, active: number): string {
 }
 
 // calculates x-offset to set "active" to center based on "vw"
-function getCenterOffset(active: number, vw: number) {
-  const gap = getGap(vw);
+function getCenterOffset(active: number, vw: number, isMobile: boolean = false) {
+  const gap = getGap(vw, isMobile);
   let off = 0;
   for (let i = 0; i < active; i++) off += getWidth(i, active, vw) + gap;
   off += getWidth(active, active, vw) / 2;
@@ -184,19 +201,34 @@ export default function ScrollStrip() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // gap and x transform
-  const gap = getGap(vp.w);
-  const tx = getCenterOffset(activeIndex, vp.w);
+  const isMobile = vp.w < 1000;
+
+  // gap and x/y transform
+  const gap = getGap(vp.w, isMobile);
+  const tx = getCenterOffset(activeIndex, vp.w, isMobile);
+  const ty = getCenterOffsetY(activeIndex, vp, gap);
 
   // progress bar sizing
   const DOT_SIZE = 10;
   const DOT_GAP = 6;
-  const activeBoxW = getWidth(activeIndex, activeIndex, vp.w);
+  const activeBoxSize = isMobile ? getMobileWidth(vp) : getWidth(activeIndex, activeIndex, vp.w);
   const inactiveDotsTotal = (SLICE_COUNT - 1) * DOT_SIZE + (SLICE_COUNT - 1) * DOT_GAP;
-  const activeDotW = activeBoxW - inactiveDotsTotal;
+  const activeDotSize = Math.max(DOT_SIZE, activeBoxSize - inactiveDotsTotal);
+
+  const ChevronUp = () => (
+    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M18 15l-6-6-6 6" />
+    </svg>
+  );
+
+  const ChevronDown = () => (
+    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
 
   return (
-    <div className="relative h-full w-full flex items-center overflow-hidden">
+    <div className={`relative h-full w-full flex ${isMobile ? 'flex-col items-center justify-start' : 'items-center'} overflow-hidden`}>
 
       {/* ambient background glow */}
       <motion.div
@@ -207,14 +239,14 @@ export default function ScrollStrip() {
       />
 
       {/* progress bar */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center" style={{ gap: DOT_GAP }}>
+      <div className={`absolute z-50 ${isMobile ? 'left-4 top-1/2 -translate-y-1/2 flex-col' : 'bottom-8 left-1/2 -translate-x-1/2 flex-row'} flex items-center`} style={{ gap: DOT_GAP }}>
         {PROJECTS.map((_, i) => (
           <motion.div
             key={i}
             className="rounded-full"
             animate={{
-              width: i === activeIndex ? Math.max(DOT_SIZE, activeDotW) : DOT_SIZE,
-              height: DOT_SIZE,
+              width: isMobile ? DOT_SIZE : (i === activeIndex ? activeDotSize : DOT_SIZE),
+              height: isMobile ? (i === activeIndex ? activeDotSize : DOT_SIZE) : DOT_SIZE,
               backgroundColor: getColor(i, activeIndex),
             }}
             transition={SPRING}
@@ -224,28 +256,50 @@ export default function ScrollStrip() {
 
       {/* strip */}
       <motion.div
-        className="flex items-center"
+        className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center`}
         style={{ gap }}
-        animate={{ x: tx }}
+        animate={{ x: isMobile ? 0 : tx, y: isMobile ? ty : 0 }}
         transition={SPRING}
       >
         {PROJECTS.map((project, i) => (
           // individual boxes
           <motion.div
             key={project.title}
-            className={`relative flex-shrink-0 ${project.onClick && i === activeIndex ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
+            className={`relative flex-shrink-0 flex items-center justify-center overflow-hidden ${
+              (isMobile && Math.abs(i - activeIndex) === 1) || (i === activeIndex && project.onClick) 
+                ? 'pointer-events-auto cursor-pointer' 
+                : 'pointer-events-none'
+            }`}
             animate={{
-              width: getWidth(i, activeIndex, vp.w),
-              height: getHeight(i, activeIndex, vp.h),
+              width: isMobile ? getMobileWidth(vp) : getWidth(i, activeIndex, vp.w),
+              height: isMobile ? getMobileHeight(i, activeIndex, vp, gap) : getHeight(i, activeIndex, vp.h),
               backgroundColor: getColor(i, activeIndex),
             }}
             transition={SPRING}
-            onClick={i === activeIndex ? project.onClick : undefined}
+            onClick={() => {
+              if (isMobile) {
+                if (i === activeIndex - 1 || i === activeIndex + 1) setActiveIndex(i);
+                else if (i === activeIndex && project.onClick) project.onClick();
+              } else {
+                if (i === activeIndex && project.onClick) project.onClick();
+              }
+            }}
           >
+            {isMobile && i === activeIndex - 1 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <ChevronUp />
+              </motion.div>
+            )}
+            {isMobile && i === activeIndex + 1 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <ChevronDown />
+              </motion.div>
+            )}
+
             {/* title */}
             {i === activeIndex && (
               <motion.div
-                className="absolute -top-6 text-sm text-gray-500"
+                className="absolute -top-6 text-sm text-gray-500 whitespace-nowrap w-full text-center px-4 truncate"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={SPRING}
