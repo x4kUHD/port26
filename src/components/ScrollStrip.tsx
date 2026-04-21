@@ -231,15 +231,17 @@ export default function ScrollStrip() {
     <div className={`relative h-full w-full flex ${isMobile ? 'flex-col items-center justify-start' : 'items-center'} overflow-hidden`}>
 
       {/* ambient background glow */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-        style={{ width: '80vw', height: '80vh', filter: 'blur(50px)' }}
-        animate={{ backgroundColor: PROJECTS[activeIndex].color, opacity: 0.3 }}
-        transition={SPRING}
-      />
+      {!isMobile && (
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+          style={{ width: '80vw', height: '80vh', filter: 'blur(50px)' }}
+          animate={{ backgroundColor: PROJECTS[activeIndex].color, opacity: 0.3 }}
+          transition={SPRING}
+        />
+      )}
 
       {/* progress bar */}
-      <div className={`absolute z-50 ${isMobile ? 'left-4 top-1/2 -translate-y-1/2 flex-col' : 'bottom-8 left-1/2 -translate-x-1/2 flex-row'} flex items-center`} style={{ gap: DOT_GAP }}>
+      <div className={`absolute z-50 ${isMobile ? 'left-4 top-1/2 -translate-y-1/2 flex-col' : 'bottom-8 left-1/2 -translate-x-1/2 flex-row'} flex items-center`} style={{ gap: `${DOT_GAP}px` }}>
         {PROJECTS.map((_, i) => (
           <motion.div
             key={i}
@@ -257,7 +259,7 @@ export default function ScrollStrip() {
       {/* strip */}
       <motion.div
         className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center`}
-        style={{ gap }}
+        style={{ gap: `${gap}px` }}
         animate={{ x: isMobile ? 0 : tx, y: isMobile ? ty : 0 }}
         transition={SPRING}
       >
@@ -329,7 +331,7 @@ export default function ScrollStrip() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`absolute ${LINK_POSITIONS[link.position]} font-normal text-white text-[48px] font-light pointer-events-auto hover:opacity-70 transition-opacity`}
+                  className={`absolute ${LINK_POSITIONS[link.position]} font-normal text-white ${isMobile ? 'text-[20px]' : 'text-[48px]'} font-light pointer-events-auto hover:opacity-70 transition-opacity`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={SPRING}
