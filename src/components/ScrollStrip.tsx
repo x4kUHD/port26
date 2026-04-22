@@ -233,8 +233,13 @@ export default function ScrollStrip() {
       {/* ambient background glow */}
       {!isMobile && (
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-          style={{ width: '80vw', height: '80vh', filter: 'blur(50px)' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ 
+            width: '100vw', 
+            height: '100vh', 
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 0%, transparent 70%)',
+            maskImage: 'radial-gradient(ellipse at center, black 0%, transparent 70%)'
+          }}
           animate={{ backgroundColor: PROJECTS[activeIndex].color, opacity: 0.3 }}
           transition={SPRING}
         />
