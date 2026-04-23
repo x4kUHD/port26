@@ -133,6 +133,25 @@ function mix(a: [number, number, number], b: [number, number, number], t: number
   return `rgb(${r},${g},${bl})`;
 }
 
+function getContrastColor(colorStr: string) {
+  let r = 255, g = 255, b = 255;
+  if (colorStr.startsWith('#')) {
+    const n = parseInt(colorStr.slice(1), 16);
+    r = (n >> 16) & 255;
+    g = (n >> 8) & 255;
+    b = n & 255;
+  } else if (colorStr.startsWith('rgb')) {
+    const match = colorStr.match(/\d+/g);
+    if (match && match.length >= 3) {
+      r = parseInt(match[0]);
+      g = parseInt(match[1]);
+      b = parseInt(match[2]);
+    }
+  }
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 210) ? '#1b1b1bff' : '#ffffff';
+}
+
 // gradient radiates from active slice: left → lighter, right → darker
 function getColor(i: number, active: number): string {
   const base = hexToRgb(PROJECTS[active].color);
@@ -215,14 +234,14 @@ export default function ScrollStrip() {
   const inactiveDotsTotal = (SLICE_COUNT - 1) * DOT_SIZE + (SLICE_COUNT - 1) * DOT_GAP;
   const activeDotSize = Math.max(DOT_SIZE, activeBoxSize - inactiveDotsTotal);
 
-  const ChevronUp = () => (
-    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+  const ChevronUp = ({ color }: { color: string }) => (
+    <svg className="w-12 h-12" style={{ color }} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
       <path d="M18 15l-6-6-6 6" />
     </svg>
   );
 
-  const ChevronDown = () => (
-    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+  const ChevronDown = ({ color }: { color: string }) => (
+    <svg className="w-12 h-12" style={{ color }} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
       <path d="M6 9l6 6 6-6" />
     </svg>
   );
@@ -246,7 +265,10 @@ export default function ScrollStrip() {
       )}
 
       {/* progress bar */}
-      <div className={`absolute z-50 ${isMobile ? 'left-4 top-1/2 -translate-y-1/2 flex-col' : 'bottom-8 left-1/2 -translate-x-1/2 flex-row'} flex items-center`} style={{ gap: `${DOT_GAP}px` }}>
+      <div 
+        className={`absolute z-50 ${isMobile ? 'left-4 flex-col' : 'bottom-8 left-1/2 -translate-x-1/2 flex-row'} flex items-center`} 
+        style={{ gap: `${DOT_GAP}px`, ...(isMobile ? { top: `${vp.h / 2}px`, transform: 'translateY(-50%)' } : {}) }}
+      >
         {PROJECTS.map((_, i) => (
           <motion.div
             key={i}
@@ -294,12 +316,12 @@ export default function ScrollStrip() {
           >
             {isMobile && i === activeIndex - 1 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                <ChevronUp />
+                <ChevronUp color={getContrastColor(getColor(i, activeIndex))} />
               </motion.div>
             )}
             {isMobile && i === activeIndex + 1 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                <ChevronDown />
+                <ChevronDown color={getContrastColor(getColor(i, activeIndex))} />
               </motion.div>
             )}
 
