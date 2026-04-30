@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+
+// IMAGES
 import wasdImg from "../assets/wasd.png";
 import beachesImg from "../assets/beaches.png";
 import hawaiiImg from "../assets/hawaii.png";
@@ -34,7 +36,6 @@ const LINK_POSITIONS: Record<LinkPosition, string> = {
 };
 
 // SOURE OF TRUTH
-
 type Project = {
   title: string;
   width: number;      // fraction of vw (e.g. 0.35 = 35%)
@@ -133,6 +134,7 @@ function mix(a: [number, number, number], b: [number, number, number], t: number
   return `rgb(${r},${g},${bl})`;
 }
 
+// contrast for arrows 
 function getContrastColor(colorStr: string) {
   let r = 255, g = 255, b = 255;
   if (colorStr.startsWith('#')) {
@@ -186,7 +188,7 @@ export default function ScrollStrip() {
   // scroll accumulator
   const scrollAcc = useRef(0);
 
-  // useEffect(fn, []) -> on mount (when component first appears )
+  // useEffect(fn, []) -> on mount (when component first appears)
 
   // window resize handler 
   useEffect(() => {
