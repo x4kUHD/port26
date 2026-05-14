@@ -54,7 +54,7 @@ const wasdOnClick = () => {
 
 const PROJECTS: Project[] = [
 
-  { title: "Use arrow keys or scroll wheel for navigation", width: 0.5, height: 0.8, color: "#ffffff", imgUrl: titleImg, imgScale: 0.8 },
+  { title: "Use arrow keys or scroll wheel for navigation", width: 0.7, height: 0.8, color: "#ffffff", imgUrl: titleImg, imgScale: 0.8 },
 
   { title: "Pix", width: 0.3, height: 0.8, color: "#515A5D", imgUrl: pixImg },
 
