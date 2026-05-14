@@ -73,7 +73,7 @@ const PROJECTS: Project[] = [
   // { title: "Wow I should hire him",  width: 0.5, height: 0.8, color: "#49D650" },
 
   {
-    title: "Contacts and Links", width: 0.5, height: 0.8, color: "#151515", links: [
+    title: "Contacts and Links", width: 0.7, height: 0.8, color: "#151515", links: [
       { label: "GitHub", url: "https://github.com/x4kUHD", position: "top-left" },
       { label: "© 2026", url: "#", position: "top-right" },
       { label: "LinkedIn", url: "https://www.linkedin.com/in/yeonwook-kim/", position: "center" },
